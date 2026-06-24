@@ -37,7 +37,14 @@ async function register(req, res) {
             { id: newUser._id, username: newUser.username },
             process.env.jwt_secret,
             { expiresIn: '1d' }
-        )
+        );
+
+        res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,        // production https
+    sameSite: "none",    // IMPORTANT for cross-site frontend/backend
+    maxAge: 24 * 60 * 60 * 1000
+})
 
 
 
@@ -88,7 +95,12 @@ const { email, password } = req.body
         { expiresIn: "1d" }
     )
 
-    res.cookie("token", token)
+    res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,        // production https
+    sameSite: "none",    // IMPORTANT for cross-site frontend/backend
+    maxAge: 24 * 60 * 60 * 1000
+})
     res.status(200).json({
         message: "User loggedIn successfully.",
         user: {
