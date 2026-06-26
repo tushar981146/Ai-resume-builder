@@ -1,47 +1,74 @@
 const pdfParse = require('pdf-parse');
-const {generateInterviewReport, generateResumePdf} = require("../services/ai.service")
+const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
 
 async function generateReport(req, res) {
 
-    const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+    try {
+        const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
 
-    const { selfDescription, jobDescription } = req.body
+        const { selfDescription, jobDescription } = req.body
 
-    const interviewReportByAI = await generateInterviewReport({
-        resume: await resumeContent.text,
-        jobDescription,
-        selfDescription
-    });
-
-
-    const interviewReport = new interviewReportModel({
-        user: req.user.id,
-        resume: resumeContent.text,
-        selfDescription,
-        jobDescription,
-
-        title: interviewReportByAI.reportTitle,
-        
-        ...interviewReportByAI
-    });
-
-    await interviewReport.save();
-
-    res.status(201).json({
-        message: "Interview report generated successfully",
-        interviewReport
-    })
+        const interviewReportByAI = await generateInterviewReport({
+            resume: await resumeContent.text,
+            jobDescription,
+            selfDescription
+        });
 
 
-};
+        const interviewReport = new interviewReportModel({
+            user: req.user.id,
+            resume: resumeContent.text,
+            selfDescription,
+            jobDescription,
+
+            title: interviewReportByAI.reportTitle,
+
+            ...interviewReportByAI
+        });
+
+        await interviewReport.save();
+
+        res.status(201).json({
+            message: "Interview report generated successfully",
+            interviewReport
+        })
+    } catch (err) {
+
+        console.error(err);
+
+        const code = err?.error?.code || err?.status;
+
+        if (code === 503) {
+            return res.status(503).json({
+                message:
+                    "AI service is busy. Please try again in a few moments."
+            });
+        }
+
+        if (code === 429) {
+            return res.status(429).json({
+                message:
+                    "Too many requests. Please wait before trying again."
+            });
+        }
+
+        return res.status(500).json({
+            message: "Something went wrong."
+        });
+    }
+
+}
+
+
+
 
 
 async function getInterviewReportByIdController(req, res) {
     const { interviewId } = req.params;
 
-    const interviewReport = await interviewReportModel.findById({_id: interviewId, user: req.user.id});
+    const interviewReport = await interviewReportModel.findById({ _id: interviewId, user: req.user.id });
 
     if (!interviewReport) {
         return res.status(404).json({ message: "Interview report not found" });
@@ -56,7 +83,7 @@ async function getInterviewReportByIdController(req, res) {
 
 
 async function getAllInterviewReports(req, res) {
-    const interviewReports = await interviewReportModel.find({ user: req.user.id }).sort({ createdAt: -1}).select("-resume -selfDescription -jobDescription -_v -technicalQuestions -behavioralQuestions -skillGaps -preparationPlan");
+    const interviewReports = await interviewReportModel.find({ user: req.user.id }).sort({ createdAt: -1 }).select("-resume -selfDescription -jobDescription -_v -technicalQuestions -behavioralQuestions -skillGaps -preparationPlan");
 
     res.status(200).json({
         message: "Interview reports fetched successfully",
@@ -95,4 +122,4 @@ async function generateResumePdfController(req, res) {
 
 
 
-module.exports = {generateReport, generateResumePdfController, getInterviewReportByIdController, getAllInterviewReports }
+module.exports = { generateReport, generateResumePdfController, getInterviewReportByIdController, getAllInterviewReports }
