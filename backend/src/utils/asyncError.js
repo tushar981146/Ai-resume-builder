@@ -5,4 +5,4 @@ const asyncErrorHandler = (fn) => {
     };
 };
 
-module.export = asyncErrorHandler;
+module.exports = asyncErrorHandler;
