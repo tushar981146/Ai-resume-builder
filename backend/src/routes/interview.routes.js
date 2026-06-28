@@ -3,6 +3,7 @@ const {authUser } = require("../middlewares/auth.middleware")
 const router = express.Router();
 const { generateReport, generateResumePdfController, getInterviewReportByIdController,getAllInterviewReports }= require("../controllers/interview.controller")
 const upload = require("../middlewares/file.middleware")
+const asyncErrorHandler = require("../utils/asyncError")
 
 
 
@@ -11,16 +12,15 @@ const upload = require("../middlewares/file.middleware")
 
 
 
-
-router.post('/', authUser, upload.single("resume"), generateReport)
-
-
-router.get('/report/:interviewId', authUser, getInterviewReportByIdController)
+router.post('/', authUser, upload.single("resume"), asyncErrorHandler(generateReport))
 
 
-router.get('/', authUser, getAllInterviewReports)
+router.get('/report/:interviewId', authUser, asyncErrorHandler(getInterviewReportByIdController))
 
-router.post('/resume/pdf/:interviewReportId', authUser, generateResumePdfController)
+
+router.get('/', authUser, asyncErrorHandler(getAllInterviewReports))
+
+router.post('/resume/pdf/:interviewReportId', authUser, asyncErrorHandler(generateResumePdfController))
 
 
 

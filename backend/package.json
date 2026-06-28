@@ -18,13 +18,13 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "html-pdf-node": "^1.0.8",
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.2",
     "multer": "^2.1.1",
     "npm": "^11.15.0",
     "pdf-parse": "^2.4.5",
-    "puppeteer": "^25.1.0",
     "zod": "^4.4.3",
     "zod-to-json-schema": "^3.25.2"
   }

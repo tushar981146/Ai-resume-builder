@@ -3,6 +3,8 @@ const { register, login, logout, getMe } = require('../controllers/auth.controll
 
 const { authUser } = require('../middlewares/auth.middleware')
 
+const asyncErrorHandler = require("../utils/asyncError")
+
 const router = express.Router();
 
 /**
@@ -14,11 +16,11 @@ const router = express.Router();
 
 
 
-router.post('/register', register)
-router.post('/login', login)
-router.post('/logout', logout)
+router.post('/register', asyncErrorHandler(register))
+router.post('/login', asyncErrorHandler(login))
+router.post('/logout', asyncErrorHandler(logout))
 
-router.get('/get-me', authUser, getMe)
+router.get('/get-me', authUser, asyncErrorHandler(getMe))
 
 
 
